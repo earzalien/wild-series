@@ -20,3 +20,7 @@ app
   .on("error", (err: Error) => {
     console.error("Error:", err.message);
   });
+
+app.get("/", (req, res) => {
+  res.send("Welcome to Wild Series !");
+});
