@@ -25,6 +25,51 @@ const read: RequestHandler = async (req, res, next) => {
   }
 };
 
+const validate: RequestHandler = (req, res, next) => {
+  type ValidationError = {
+    field: string;
+    message: string;
+  };
+
+  const errors: ValidationError[] = [];
+  const { title, synopsis, poster, country, year } = req.body;
+
+  if (title == null) {
+    errors.push({ field: "title", message: "The field is required" });
+  } else if (typeof title !== "string") {
+    errors.push({ field: "title", message: "Should be a string" });
+  } else if (title.length > 255) {
+    errors.push({
+      field: "title",
+      message: "Should contain less than 255 characters",
+    });
+  }
+
+  if (synopsis == null) {
+    errors.push({ field: "synopsis", message: "The field is required" });
+  } else if (typeof synopsis !== "string") {
+    errors.push({ field: "synopsis", message: "Should be a string" });
+  }
+
+  if (poster != null && typeof poster !== "string") {
+    errors.push({ field: "poster", message: "Should be a string URL" });
+  }
+
+  if (country != null && typeof country !== "string") {
+    errors.push({ field: "country", message: "Should be a string" });
+  }
+
+  if (year != null && Number.isNaN(Number(year))) {
+    errors.push({ field: "year", message: "Should be a number" });
+  }
+
+  if (errors.length === 0) {
+    next();
+  } else {
+    res.status(400).json({ validationErrors: errors });
+  }
+};
+
 const add: RequestHandler = async (req, res, next) => {
   try {
     const newProgram = {
@@ -36,7 +81,6 @@ const add: RequestHandler = async (req, res, next) => {
     };
 
     const insertId = await programRepository.create(newProgram);
-
     res.status(201).json({ insertId });
   } catch (err) {
     next(err);
@@ -69,7 +113,6 @@ const edit: RequestHandler = async (req, res, next) => {
 const destroy: RequestHandler = async (req, res, next) => {
   try {
     const id = Number(req.params.id);
-
     const affectedRows = await programRepository.delete(id);
 
     if (affectedRows === 0) {
@@ -82,4 +125,4 @@ const destroy: RequestHandler = async (req, res, next) => {
   }
 };
 
-export default { browse, read, add, edit, destroy };
+export default { browse, read, add, edit, destroy, validate };
