@@ -1,4 +1,3 @@
-// modules/program/programRepository.ts
 import databaseClient from "../../../database/client";
 import type { Result, Rows } from "../../../database/client";
 
